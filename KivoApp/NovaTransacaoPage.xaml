@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KivoApp.NovaTransacaoPage"
+             Title="Nova Transação"
+             BackgroundColor="{StaticResource BackgroundColor}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- Título -->
+            <Label Text="Adicionar Nova Transação"
+                   FontSize="28"
+                   HorizontalOptions="Center"
+                   TextColor="{StaticResource TextPrimaryColor}"
+                   FontAttributes="Bold"/>
+
+            <!-- Card de formulário -->
+            <Border StrokeShape="RoundRectangle 20"
+                    Background="{StaticResource CardColor}"
+                    StrokeThickness="0"
+                    Padding="20"
+                    Shadow="5,5,10,Black">
+
+                <VerticalStackLayout Spacing="15">
+
+                    <!-- Descrição -->
+                    <Entry Placeholder="Descrição"
+                           FontSize="18"
+                           TextColor="{StaticResource TextPrimaryColor}"
+                           PlaceholderColor="{StaticResource TextSecondaryColor}" />
+
+                    <!-- Valor -->
+                    <Entry Placeholder="Valor"
+                           FontSize="18"
+                           TextColor="{StaticResource TextPrimaryColor}"
+                           Keyboard="Numeric"
+                           PlaceholderColor="{StaticResource TextSecondaryColor}" />
+
+                    <!-- Tipo de transação -->
+                    <Picker Title="Tipo de Transação"
+                            FontSize="18"
+                            TextColor="{StaticResource TextPrimaryColor}">
+                        <Picker.Items>
+                            <x:String>Entrada</x:String>
+                            <x:String>Saída</x:String>
+                        </Picker.Items>
+                    </Picker>
+
+                    <!-- Data da transação -->
+                    <DatePicker Format="dd/MM/yyyy"
+                                FontSize="18"
+                                TextColor="{StaticResource TextPrimaryColor}"/>
+
+                    <!-- Botão Salvar -->
+                    <Button Text="Salvar Transação"
+                            BackgroundColor="{StaticResource PrimaryColor}"
+                            TextColor="White"
+                            FontSize="18"
+                            CornerRadius="25"
+                            HeightRequest="50"
+                            Clicked="OnSalvarTransacaoClicked"/>
+
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
