@@ -1,0 +1,29 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KivoApp.RelatoriosPage"
+             Title="Relatórios"
+             
+             BackgroundColor="{StaticResource BackgroundColor}">
+
+    <ScrollView Padding="20">
+        <VerticalStackLayout Spacing="20">
+
+            <Label Text="Relatórios Financeiros"
+                   FontSize="24"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" />
+
+            <Border Padding="20"
+                    StrokeShape="RoundRectangle 15"
+                    BackgroundColor="{StaticResource CardColor}">
+                <VerticalStackLayout>
+                    <Label Text="Entradas no mês: R$ 3.500,00" TextColor="Green" FontSize="18"/>
+                    <Label Text="Saídas no mês: R$ 2.250,00" TextColor="Red" FontSize="18"/>
+                    <Label Text="Saldo final: R$ 1.250,00" TextColor="White" FontSize="18"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Aqui futuramente dá para colocar gráficos -->
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

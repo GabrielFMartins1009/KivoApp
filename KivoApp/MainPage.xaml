@@ -2,121 +2,100 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:services="clr-namespace:KivoApp.Services"
              xmlns:converters="clr-namespace:KivoApp.Converters"
-
              x:Class="KivoApp.MainPage"
              BackgroundColor="{StaticResource BackgroundColor}"
              Title="Kivo">
 
-    <Grid Padding="20">
-        <!-- Conteúdo principal com ScrollView -->
-        <ScrollView Grid.Row="0">
-            <VerticalStackLayout Spacing="20">
-
+    <Grid>
+        <!-- Conteúdo principal -->
+        <ScrollView>
+            <VerticalStackLayout Spacing="20" Padding="20">
                 <!-- Título -->
                 <Label Text="KivoApp" 
-                       Style="{StaticResource Headline}"
-                       TextColor="White"
-                       HorizontalOptions="Center" 
-                       Margin="0,10,0,20" />
+                   Style="{StaticResource Headline}"
+                   TextColor="White"
+                   HorizontalOptions="Center" 
+                   Margin="0,10,0,20" />
 
                 <!-- Card de saldo -->
                 <Border Style="{StaticResource CardStyle}" Padding="20" StrokeShape="RoundRectangle 15">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Saldo disponível" 
-                               FontSize="16"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
+                           FontSize="16"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
                         <Label Text="R$ 1.250,00" 
-                               FontSize="32"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center"
-                               TextColor="{StaticResource Primary}"/>
+                           FontSize="32"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           TextColor="{StaticResource Primary}"/>
                     </VerticalStackLayout>
                 </Border>
 
                 <!-- Entradas e saídas -->
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="15">
-
                     <!-- Entradas -->
-                    <Border Style="{StaticResource CardStyle}" Padding="15" StrokeShape="RoundRectangle 12"
-                            Grid.Column="0">
+                    <Border Style="{StaticResource CardStyle}" Padding="15" StrokeShape="RoundRectangle 12" Grid.Column="0">
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Entradas" FontSize="14" 
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="R$ 3.500,00" FontSize="20" FontAttributes="Bold"
-                                   TextColor="Green"/>
+                               TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
+                            <Label Text="R$ 3.500,00" FontSize="20" FontAttributes="Bold" TextColor="Green"/>
                         </VerticalStackLayout>
                     </Border>
 
                     <!-- Saídas -->
-                    <Border Style="{StaticResource CardStyle}" Padding="15" StrokeShape="RoundRectangle 12"
-                            Grid.Column="1">
+                    <Border Style="{StaticResource CardStyle}" Padding="15" StrokeShape="RoundRectangle 12" Grid.Column="1">
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Saídas" FontSize="14" 
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="R$ 2.250,00" FontSize="20" FontAttributes="Bold"
-                                   TextColor="Red"/>
+                               TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
+                            <Label Text="R$ 2.250,00" FontSize="20" FontAttributes="Bold" TextColor="Red"/>
                         </VerticalStackLayout>
                     </Border>
-
                 </Grid>
 
-                <!-- Histórico de transações -->
-                <Label Text="Histórico" 
-       FontSize="20"
-       FontAttributes="Bold"
-       TextColor="{StaticResource TextPrimaryColor}"
-       Margin="0,20,0,10"/>
+                <!-- Histórico -->
+                <Label Text="Histórico" FontSize="20" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" Margin="0,20,0,10"/>
 
                 <CollectionView ItemsSource="{x:Static services:TransacaoService.Transacoes}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate>
                             <Border StrokeShape="RoundRectangle 12"
-                    Background="{StaticResource CardColor}"
-                    Padding="10"
-                    Margin="0,0,0,10">
+                                Background="{StaticResource CardColor}"
+                                Padding="10"
+                                Margin="0,0,0,10">
                                 <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Center">
-                                    <Label Text="{Binding Descricao}" 
-                           FontSize="16"
-                           TextColor="{StaticResource TextPrimaryColor}" />
-                                    <Label Text="{Binding Valor, StringFormat='R$ {0:F2}'}"
-                           FontSize="16"
-                           TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
-                           Grid.Column="1"
-                           HorizontalOptions="End"/>
-                                    <Label Text="{Binding Data, StringFormat='dd/MM/yyyy'}"
-                           FontSize="14"
-                           TextColor="{StaticResource TextSecondaryColor}"
-                           Grid.Column="2"
-                           HorizontalOptions="End"
-                           Margin="10,0,0,0"/>
+                                    <Label Text="{Binding Descricao}" FontSize="16"
+                                       TextColor="{StaticResource TextPrimaryColor}" />
+                                    <Label Text="{Binding Valor, StringFormat='R$ {0:F2}'}" FontSize="16"
+                                       TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
+                                       Grid.Column="1" HorizontalOptions="End"/>
+                                    <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14"
+                                       TextColor="{StaticResource TextSecondaryColor}"
+                                       Grid.Column="2" HorizontalOptions="End" Margin="10,0,0,0"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-
-
-
-
-
-
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Botão de Nova Transação -->
-
-        <Button Text="+" 
-                FontSize="28"
+        <!-- Botão flutuante no canto superior direito -->
+        <Button
                 WidthRequest="60"
                 HeightRequest="60"
                 CornerRadius="30"
                 BackgroundColor="{StaticResource PrimaryColor}"
                 TextColor="White"
-                VerticalOptions="End"
+                FontFamily="MaterialDesignIcons"
+                FontSize="28"
+                Text="＋"
+                Shadow="10,10,5,Black"
                 HorizontalOptions="End"
-                Margin="20"
+                VerticalOptions="Start"
+                Margin="0,20,20,0"
                 Clicked="OnNovaTransacaoClicked"/>
 
-
     </Grid>
+
 </ContentPage>

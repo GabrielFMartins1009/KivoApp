@@ -8,7 +8,7 @@
         public App()
         {
             InitializeComponent();
-
+            
 #if WINDOWS
             Microsoft.Maui.Handlers.WindowHandler.Mapper.AppendToMapping(nameof(IWindow), (handler, view) =>
             {
@@ -27,10 +27,10 @@
         protected override Window CreateWindow(IActivationState? activationState)
         {
             // Cria a NavigationPage com a MainPage como root
-            var navPage = new NavigationPage(new MainPage());
+            //  var navPage = new NavigationPage(new MainPage());
 
             // Retorna a Window com a NavigationPage como conteúdo
-            return new Window(navPage);
+            return new Window(new AppShell());
         }
     }
 }
