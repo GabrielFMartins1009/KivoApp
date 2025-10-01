@@ -1,5 +1,8 @@
 ﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:services="clr-namespace:KivoApp.Services"
+             xmlns:converters="clr-namespace:KivoApp.Converters"
+
              x:Class="KivoApp.MainPage"
              BackgroundColor="{StaticResource BackgroundColor}"
              Title="Kivo">
@@ -57,29 +60,63 @@
 
                 </Grid>
 
+                <!-- Histórico de transações -->
+                <Label Text="Histórico" 
+       FontSize="20"
+       FontAttributes="Bold"
+       TextColor="{StaticResource TextPrimaryColor}"
+       Margin="0,20,0,10"/>
+
+                <CollectionView ItemsSource="{x:Static services:TransacaoService.Transacoes}">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Border StrokeShape="RoundRectangle 12"
+                    Background="{StaticResource CardColor}"
+                    Padding="10"
+                    Margin="0,0,0,10">
+                                <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Center">
+                                    <Label Text="{Binding Descricao}" 
+                           FontSize="16"
+                           TextColor="{StaticResource TextPrimaryColor}" />
+                                    <Label Text="{Binding Valor, StringFormat='R$ {0:F2}'}"
+                           FontSize="16"
+                           TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
+                           Grid.Column="1"
+                           HorizontalOptions="End"/>
+                                    <Label Text="{Binding Data, StringFormat='dd/MM/yyyy'}"
+                           FontSize="14"
+                           TextColor="{StaticResource TextSecondaryColor}"
+                           Grid.Column="2"
+                           HorizontalOptions="End"
+                           Margin="10,0,0,0"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+
+
+
+
+
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- Botão de Nova Transação e título fixo na parte de baixo -->
-        <VerticalStackLayout Grid.Row="1"
-                             VerticalOptions="End"
-                             HorizontalOptions="Center"
-                             Spacing="10">
-            <Label Text="Nova Transação"
-                   FontSize="18"
-                   FontAttributes="Bold"
-                   TextColor="White"
-                   HorizontalOptions="Center"/>
+        <!-- Botão de Nova Transação -->
 
-            <Button Text="+"
-                    FontSize="28"
-                    WidthRequest="60"
-                    HeightRequest="60"
-                    CornerRadius="30"
-                    BackgroundColor="{StaticResource PrimaryColor}"
-                    TextColor="White"
-                    Clicked="OnNovaTransacaoClicked"/>
-        </VerticalStackLayout>
+        <Button Text="+" 
+                FontSize="28"
+                WidthRequest="60"
+                HeightRequest="60"
+                CornerRadius="30"
+                BackgroundColor="{StaticResource PrimaryColor}"
+                TextColor="White"
+                VerticalOptions="End"
+                HorizontalOptions="End"
+                Margin="20"
+                Clicked="OnNovaTransacaoClicked"/>
+
 
     </Grid>
 </ContentPage>

@@ -19,28 +19,33 @@
             <Border StrokeShape="RoundRectangle 20"
                     Background="{StaticResource CardColor}"
                     StrokeThickness="0"
-                    Padding="20"
-                    Shadow="5,5,10,Black">
+                    Padding="20">
 
                 <VerticalStackLayout Spacing="15">
 
                     <!-- Descrição -->
-                    <Entry Placeholder="Descrição"
+                    <Entry x:Name="DescricaoEntry"
+                           Placeholder="Descrição"
                            FontSize="18"
                            TextColor="{StaticResource TextPrimaryColor}"
                            PlaceholderColor="{StaticResource TextSecondaryColor}" />
 
-                    <!-- Valor -->
-                    <Entry Placeholder="Valor"
+                    <!-- Valor (somente números) -->
+                    <Entry x:Name="ValorEntry"
+                           Placeholder="Valor"
                            FontSize="18"
                            TextColor="{StaticResource TextPrimaryColor}"
                            Keyboard="Numeric"
-                           PlaceholderColor="{StaticResource TextSecondaryColor}" />
+                           PlaceholderColor="{StaticResource TextSecondaryColor}"
+                           TextChanged="OnValorEntryTextChanged"/>
 
                     <!-- Tipo de transação -->
-                    <Picker Title="Tipo de Transação"
-                            FontSize="18"
-                            TextColor="{StaticResource TextPrimaryColor}">
+                    <Picker x:Name="TipoPicker"
+                            BackgroundColor="{StaticResource TextSecondaryColor}"
+                            Title="Tipo de Transação"
+                            TitleColor="{StaticResource TextPrimaryColor}"
+                            FontSize="18">
+                        
                         <Picker.Items>
                             <x:String>Entrada</x:String>
                             <x:String>Saída</x:String>
@@ -48,9 +53,10 @@
                     </Picker>
 
                     <!-- Data da transação -->
-                    <DatePicker Format="dd/MM/yyyy"
+                    <DatePicker x:Name="DataPicker"
+                                Format="dd/MM/yyyy"
                                 FontSize="18"
-                                TextColor="{StaticResource TextPrimaryColor}"/>
+                                TextColor="{StaticResource TextPrimaryColor}" />
 
                     <!-- Botão Salvar -->
                     <Button Text="Salvar Transação"
