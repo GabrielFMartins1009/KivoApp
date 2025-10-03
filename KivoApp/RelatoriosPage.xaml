@@ -1,29 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:services="clr-namespace:KivoApp.Services"
+             xmlns:converters="clr-namespace:KivoApp.Converters"
+             xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="KivoApp.RelatoriosPage"
              Title="Relatórios"
-             
              BackgroundColor="{StaticResource BackgroundColor}">
 
-    <ScrollView Padding="20">
-        <VerticalStackLayout Spacing="20">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
 
-            <Label Text="Relatórios Financeiros"
-                   FontSize="24"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimaryColor}" />
+            <!-- Título -->
+            <Label Text="Relatórios" FontSize="28" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" HorizontalOptions="Center" />
 
-            <Border Padding="20"
-                    StrokeShape="RoundRectangle 15"
-                    BackgroundColor="{StaticResource CardColor}">
-                <VerticalStackLayout>
-                    <Label Text="Entradas no mês: R$ 3.500,00" TextColor="Green" FontSize="18"/>
-                    <Label Text="Saídas no mês: R$ 2.250,00" TextColor="Red" FontSize="18"/>
-                    <Label Text="Saldo final: R$ 1.250,00" TextColor="White" FontSize="18"/>
-                </VerticalStackLayout>
-            </Border>
+            <!-- Cards de Totais -->
+            <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="15">
+                <Border Padding="15" StrokeShape="RoundRectangle 12" Background="{StaticResource CardColor}" HorizontalOptions="Fill">
+                    <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
+                        <Label Text="Entradas" FontSize="14" TextColor="Green"/>
+                        <Label x:Name="EntradasLabel" Text="R$ 0,00" FontSize="20" FontAttributes="Bold"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </Border>
 
-            <!-- Aqui futuramente dá para colocar gráficos -->
+                <Border Padding="15" StrokeShape="RoundRectangle 12" Background="{StaticResource CardColor}" HorizontalOptions="Fill">
+                    <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
+                        <Label Text="Saídas" FontSize="14" TextColor="Red"/>
+                        <Label x:Name="SaidasLabel" Text="R$ 0,00" FontSize="20" FontAttributes="Bold"
+                               LineBreakMode="NoWrap"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="15" StrokeShape="RoundRectangle 12" Background="{StaticResource CardColor}" HorizontalOptions="Fill">
+                    <VerticalStackLayout HorizontalOptions="Fill" Spacing="5">
+                        <Label Text="Saldo" FontSize="14" TextColor="{StaticResource Primary}"/>
+                        <Label x:Name="SaldoLabel" Text="R$ 0,00" FontSize="20" FontAttributes="Bold"
+                               LineBreakMode="NoWrap"
+                               HorizontalOptions="Center"
+                               HorizontalTextAlignment="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <!-- Histórico completo -->
+            <Label Text="Histórico (todos os lançamentos)" FontSize="20" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" Margin="0,20,0,10"/>
+
+            <CollectionView ItemsSource="{x:Static services:TransacaoService.Transacoes}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border StrokeShape="RoundRectangle 12" Background="{StaticResource CardColor}" Padding="10" Margin="0,0,0,10">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <Label Text="{Binding Descricao}" FontSize="16" TextColor="{StaticResource TextPrimaryColor}" />
+                                <Label Text="{Binding Valor, StringFormat='R$ {0:F2}'}" FontSize="16"
+                                       TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
+                                       Grid.Column="1" HorizontalOptions="End"/>
+                                <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14"
+                                       TextColor="{StaticResource TextSecondaryColor}"
+                                       Grid.Column="2" HorizontalOptions="End" Margin="10,0,0,0"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Gráfico dos últimos 30 dias -->
+            <Label Text="Gráfico dos últimos 30 dias" FontSize="20" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" Margin="0,20,0,10"/>
+
+            <microcharts:ChartView x:Name="chartView"
+                                   HeightRequest="250"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

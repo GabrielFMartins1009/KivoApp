@@ -1,25 +1,20 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using SkiaSharp.Views.Maui.Controls.Hosting;
+using Microcharts.Maui; // se a API UseMicrocharts() existir na versão instalada
+using KivoApp;
 
-namespace KivoApp
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
-        {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .UseSkiaSharp();           // << obrigatório para Skia/Microcharts
 
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
+        // se a sua versão de Microcharts oferecer UseMicrocharts extension:
+        // builder.UseMicrocharts();
 
-            return builder.Build();
-        }
+        // restante: fonts, serviços, etc...
+        return builder.Build();
     }
 }

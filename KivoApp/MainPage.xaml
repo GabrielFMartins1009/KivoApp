@@ -1,7 +1,6 @@
 ﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:services="clr-namespace:KivoApp.Services"
-             xmlns:converters="clr-namespace:KivoApp.Converters"
              x:Class="KivoApp.MainPage"
              BackgroundColor="{StaticResource BackgroundColor}"
              Title="Kivo">
@@ -23,7 +22,7 @@
                         <Label Text="Saldo disponível" 
                            FontSize="16"
                            TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                        <Label Text="R$ 1.250,00" 
+                        <Label Text="{Binding Saldo, StringFormat='R$ {0:F2}'}" 
                            FontSize="32"
                            FontAttributes="Bold"
                            HorizontalOptions="Center"
@@ -38,7 +37,7 @@
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Entradas" FontSize="14" 
                                TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="R$ 3.500,00" FontSize="20" FontAttributes="Bold" TextColor="Green"/>
+                            <Label Text="{Binding TotalEntradas, StringFormat='R$ {0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="Green"/>
                         </VerticalStackLayout>
                     </Border>
 
@@ -47,7 +46,7 @@
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Saídas" FontSize="14" 
                                TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="R$ 2.250,00" FontSize="20" FontAttributes="Bold" TextColor="Red"/>
+                            <Label Text="{Binding TotalSaidas, StringFormat='R$ {0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="Red"/>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
