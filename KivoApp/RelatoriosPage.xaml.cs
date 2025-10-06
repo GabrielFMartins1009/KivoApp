@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using Microsoft.Maui.Controls;
 using KivoApp.Services;
 using KivoApp.Models;
+using System.Collections.ObjectModel;
 using Microcharts;
 using SkiaSharp;
 
@@ -16,10 +17,10 @@ namespace KivoApp
         {
             InitializeComponent();
 
-            // Atualiza UI com os valores atuais
+            TipoPicker.SelectedIndex = 0; // "Todas"
             AtualizarTotais();
+            AtualizarListaFiltrada();
 
-            // Observa alterações na coleção
             TransacaoService.Transacoes.CollectionChanged += Transacoes_CollectionChanged;
         }
 
@@ -28,6 +29,7 @@ namespace KivoApp
             MainThread.BeginInvokeOnMainThread(() =>
             {
                 AtualizarTotais();
+                AtualizarListaFiltrada();
             });
         }
 
@@ -35,11 +37,11 @@ namespace KivoApp
         {
             base.OnAppearing();
             AtualizarTotais();
+            AtualizarListaFiltrada();
         }
 
         protected override void OnDisappearing()
         {
-            // remove handler para evitar vazamento
             TransacaoService.Transacoes.CollectionChanged -= Transacoes_CollectionChanged;
             base.OnDisappearing();
         }
@@ -48,7 +50,7 @@ namespace KivoApp
         {
             var transacoes = TransacaoService.Transacoes;
 
-            // Somatórios dos últimos 30 dias
+            // Últimos 30 dias
             var corte = DateTime.Now.AddDays(-30);
             var ultimos30 = transacoes.Where(t => t.Data >= corte).ToList();
 
@@ -61,7 +63,7 @@ namespace KivoApp
             SaidasLabel.Text = totalSaidas.ToString("C", cult);
             SaldoLabel.Text = saldo.ToString("C", cult);
 
-            // monta donut chart (Microcharts)
+            // Gráfico
             var entries = new System.Collections.Generic.List<ChartEntry>
             {
                 new ChartEntry((float)totalEntradas)
@@ -90,6 +92,43 @@ namespace KivoApp
                 LabelTextSize = 18,
                 HoleRadius = 0.5f
             };
+        }
+
+        private void OnTipoPickerChanged(object sender, EventArgs e)
+        {
+            AtualizarListaFiltrada();
+        }
+
+        private void OnDataFiltroChanged(object sender, DateChangedEventArgs e)
+        {
+            AtualizarListaFiltrada();
+        }
+
+        private void AtualizarListaFiltrada()
+        {
+            var transacoes = TransacaoService.Transacoes.AsEnumerable();
+
+            // --- Filtro por Tipo ---
+            string tipoSelecionado = TipoPicker.SelectedItem?.ToString() ?? "Todas";
+
+            if (!string.IsNullOrEmpty(tipoSelecionado) && tipoSelecionado != "Todas")
+            {
+                string tipoNormalizado = tipoSelecionado.TrimEnd('s'); // "Entradas" ? "Entrada"
+                transacoes = transacoes.Where(t =>
+                    string.Equals(t.Tipo, tipoNormalizado, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // --- Filtro por Data ---
+            DateTime dataInicio = DataInicioPicker?.Date ?? DateTime.MinValue;
+            DateTime dataFim = DataFimPicker?.Date ?? DateTime.MaxValue;
+            dataFim = dataFim.AddDays(1).AddTicks(-1); // inclui o dia inteiro
+
+            transacoes = transacoes.Where(t => t.Data >= dataInicio && t.Data <= dataFim);
+
+            // --- Atualiza Lista ---
+            HistoricoCollectionView.ItemsSource = transacoes
+                .OrderByDescending(t => t.Data)
+                .ToList();
         }
     }
 }

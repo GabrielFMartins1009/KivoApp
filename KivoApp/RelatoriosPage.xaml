@@ -4,6 +4,7 @@
              xmlns:services="clr-namespace:KivoApp.Services"
              xmlns:converters="clr-namespace:KivoApp.Converters"
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              x:Class="KivoApp.RelatoriosPage"
              Title="Relatórios"
              BackgroundColor="{StaticResource BackgroundColor}">
@@ -13,7 +14,7 @@
 
             <!-- Título -->
             <Label Text="Relatórios" FontSize="28" FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimaryColor}" HorizontalOptions="Center" />
+                   TextColor="{StaticResource TextPrimaryColor}" HorizontalOptions="Start" />
 
             <!-- Cards de Totais -->
             <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="15">
@@ -47,11 +48,57 @@
                 </Border>
             </Grid>
 
-            <!-- Histórico completo -->
-            <Label Text="Histórico (todos os lançamentos)" FontSize="20" FontAttributes="Bold"
+            <!-- Filtro por tipo -->
+            <Label Text="Filtrar por tipo:"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" />
+
+            <Picker x:Name="TipoPicker"
+                    Title="Selecione"
+                    SelectedIndexChanged="OnTipoPickerChanged"
+                    BackgroundColor="{StaticResource CardColor}"
+                    TextColor="{StaticResource TextPrimaryColor}">
+                <Picker.Items>
+                    <x:String>Todas</x:String>
+                    <x:String>Entradas</x:String>
+                    <x:String>Saídas</x:String>
+                </Picker.Items>
+            </Picker>
+
+            <!-- Filtro por período -->
+            <Label Text="Filtrar por período:"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <VerticalStackLayout>
+                    <Label Text="De:" FontSize="14" TextColor="{StaticResource TextSecondaryColor}" />
+                    <DatePicker x:Name="DataInicioPicker"
+                                Date="{x:Static sys:DateTime.Now}"
+                                MaximumDate="{x:Static sys:DateTime.Now}"
+                                DateSelected="OnDataFiltroChanged"
+                                BackgroundColor="{StaticResource CardColor}"
+                                TextColor="{StaticResource TextPrimaryColor}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1">
+                    <Label Text="Até:" FontSize="14" TextColor="{StaticResource TextSecondaryColor}" />
+                    <DatePicker x:Name="DataFimPicker"
+                                Date="{x:Static sys:DateTime.Now}"
+                                MaximumDate="{x:Static sys:DateTime.Now}"
+                                DateSelected="OnDataFiltroChanged"
+                                BackgroundColor="{StaticResource CardColor}"
+                                TextColor="{StaticResource TextPrimaryColor}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Histórico -->
+            <Label Text="Histórico" FontSize="20" FontAttributes="Bold"
                    TextColor="{StaticResource TextPrimaryColor}" Margin="0,20,0,10"/>
 
-            <CollectionView ItemsSource="{x:Static services:TransacaoService.Transacoes}">
+            <CollectionView x:Name="HistoricoCollectionView">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Border StrokeShape="RoundRectangle 12" Background="{StaticResource CardColor}" Padding="10" Margin="0,0,0,10">
@@ -69,7 +116,7 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <!-- Gráfico dos últimos 30 dias -->
+            <!-- Gráfico -->
             <Label Text="Gráfico dos últimos 30 dias" FontSize="20" FontAttributes="Bold"
                    TextColor="{StaticResource TextPrimaryColor}" Margin="0,20,0,10"/>
 
