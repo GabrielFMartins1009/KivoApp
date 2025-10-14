@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:services="clr-namespace:KivoApp.Services"
+             x:Class="KivoApp.MetasPage"
+             Title="Metas Financeiras"
+             BackgroundColor="{StaticResource BackgroundColor}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <Label Text="Metas Financeiras" FontSize="28" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}" HorizontalOptions="Center" />
+
+            <!-- Formulário -->
+            <Entry x:Name="DescricaoEntry" Placeholder="Descrição da Meta"
+                   Keyboard="Default"
+                   BackgroundColor="{StaticResource CardColor}"
+                   TextColor="{StaticResource TextPrimaryColor}" />
+
+            <Entry x:Name="ValorAlvoEntry" Placeholder="Valor Alvo (R$)"
+                   Keyboard="Numeric"
+                   BackgroundColor="{StaticResource CardColor}" 
+                   TextColor="{StaticResource TextPrimaryColor}"
+                   TextChanged="ValorAlvoEntry_TextChanged"/>
+
+            <DatePicker x:Name="DataMetaPicker" />
+
+            <Button Text="Salvar Meta" Clicked="SalvarMeta_Clicked"
+                    BackgroundColor="{StaticResource PrimaryColor}" TextColor="White" />
+
+            <!-- Lista de metas -->
+            <CollectionView x:Name="MetasCollectionView" Margin="0,20,0,0">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Padding="10" StrokeShape="RoundRectangle 12"
+                                Background="{StaticResource CardColor}" Margin="0,0,0,10">
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="{Binding Descricao}" FontSize="16" TextColor="{StaticResource TextPrimaryColor}" />
+                                <Label Text="{Binding ValorAtual, StringFormat='Atual: R$ {0:N2}'}" FontSize="14" TextColor="Green"/>
+                                <Label Text="{Binding ValorAlvo, StringFormat='Alvo: R$ {0:N2}'}" FontSize="14" TextColor="Blue"/>
+                                <Label Text="{Binding Progresso}" FontSize="14" TextColor="{StaticResource Primary}"/>
+
+                                <!-- Barrinha de progresso -->
+                                <ProgressBar Progress="{Binding Porcentagem}" 
+                                             ProgressColor="#4CAF50"
+                                             HeightRequest="8"
+                                             BackgroundColor="#333333"/>
+
+                                <Label Text="{Binding DataMeta, StringFormat='Data: {0:dd/MM/yyyy}'}" FontSize="12" TextColor="{StaticResource TextSecondaryColor}"/>
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

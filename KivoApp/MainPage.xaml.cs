@@ -55,5 +55,6 @@ public partial class MainPage : ContentPage, INotifyPropertyChanged
     private async void OnNovaTransacaoClicked(object sender, EventArgs e)
     {
         await Navigation.PushAsync(new NovaTransacaoPage());
+    
     }
 }

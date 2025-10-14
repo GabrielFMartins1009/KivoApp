@@ -40,7 +40,13 @@ public partial class NovaTransacaoPage : ContentPage
             Data = data
         };
 
+        // Adiciona a transação
         TransacaoService.AdicionarTransacao(t);
+
+        // Atualiza as metas depois que a transação foi adicionada
+        decimal saldoDisponivel = TransacaoService.CalcularSaldo();
+        MetaService.AtualizarMetas(saldoDisponivel);
+
 
         await DisplayAlert("Sucesso", "Transação adicionada!", "OK");
         await Navigation.PopAsync();

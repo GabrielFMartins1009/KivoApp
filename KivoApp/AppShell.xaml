@@ -14,4 +14,8 @@
         <ShellContent ContentTemplate="{DataTemplate local:RelatoriosPage}" />
     </FlyoutItem>
 
+    <FlyoutItem Title="Metas" Icon="target.png">
+        <ShellContent ContentTemplate="{DataTemplate local:MetasPage}" />
+    </FlyoutItem>
+
 </Shell>

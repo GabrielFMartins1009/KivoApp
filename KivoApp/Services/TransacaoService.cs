@@ -10,5 +10,21 @@ namespace KivoApp.Services
 
         public static void AdicionarTransacao(Transacao transacao) => Transacoes.Add(transacao);
         public static void RemoverTransacao(Transacao transacao) => Transacoes.Remove(transacao);
+
+        // ?? Novo método para calcular o saldo total
+        public static decimal CalcularSaldo()
+        {
+            decimal saldo = 0;
+
+            foreach (var transacao in Transacoes)
+            {
+                if (transacao.Tipo == "Entrada")
+                    saldo += transacao.Valor;
+                else if (transacao.Tipo == "Saída")
+                    saldo -= transacao.Valor;
+            }
+
+            return saldo;
+        }
     }
 }

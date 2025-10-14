@@ -10,9 +10,10 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- registrar o conversor AQUI -->
+            <!-- registrar os conversores AQUI -->
             <converters:TipoToColorConverter x:Key="TipoToColorConverter" />
-
+            <converters:PercentToFractionConverter x:Key="PercentToFractionConverter" />
+            <converters:PorcentagemToProgressConverter x:Key="PorcentagemToProgressConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>
