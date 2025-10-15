@@ -1,4 +1,10 @@
-﻿namespace KivoApp
+﻿using KivoApp.Services;
+using Microsoft.Maui.Controls;
+using Microsoft.Maui;
+using System;
+using System.Threading.Tasks;
+
+namespace KivoApp
 {
     public partial class App : Application
     {
@@ -8,7 +14,10 @@
         public App()
         {
             InitializeComponent();
-            
+
+            // Inicializa dados em background (não bloquear UI)
+            _ = InitializeDataAsync();
+
 #if WINDOWS
             Microsoft.Maui.Handlers.WindowHandler.Mapper.AppendToMapping(nameof(IWindow), (handler, view) =>
             {
@@ -24,13 +33,22 @@
 #endif
         }
 
+        private async Task InitializeDataAsync()
+        {
+            // Carrega transações e metas do armazenamento
+            await TransacaoService.LoadFromStorageAsync();
+            await MetaService.LoadFromStorageAsync();
+
+            // Atualiza metas com saldo atual (após carregar transações)
+            var saldo = TransacaoService.CalcularSaldo();
+            MetaService.AtualizarMetas(saldo);
+        }
+
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            // Cria a NavigationPage com a MainPage como root
-            //  var navPage = new NavigationPage(new MainPage());
 
-            // Retorna a Window com a NavigationPage como conteúdo
+            // Retorna a janela com o AppShell como conteúdo
             return new Window(new AppShell());
         }
     }
-}
+}   

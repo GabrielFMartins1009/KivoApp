@@ -58,9 +58,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microcharts.Maui" Version="1.0.1" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.111" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.10" />
 		<PackageReference Include="SkiaSharp.Views.Maui.Controls" Version="3.119.1" />
+		<PackageReference Include="SQLite.Net-PCL" Version="3.1.1" />
+		<PackageReference Include="SQLiteNetExtensionsAsyncUpdate" Version="2.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -104,7 +104,7 @@
                         <Border StrokeShape="RoundRectangle 12" Background="{StaticResource CardColor}" Padding="10" Margin="0,0,0,10">
                             <Grid ColumnDefinitions="*,Auto,Auto">
                                 <Label Text="{Binding Descricao}" FontSize="16" TextColor="{StaticResource TextPrimaryColor}" />
-                                <Label Text="{Binding Valor, StringFormat='R$ {0:F2}'}" FontSize="16"
+                                <Label Text="{Binding Valor, StringFormat='R$ {0:N2}'}" FontSize="16"
                                        TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
                                        Grid.Column="1" HorizontalOptions="End"/>
                                 <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14"

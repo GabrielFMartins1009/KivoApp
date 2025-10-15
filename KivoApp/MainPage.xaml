@@ -23,7 +23,7 @@
                         <Label Text="Saldo disponível" 
                            FontSize="16"
                            TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                        <Label Text="{Binding Saldo, StringFormat='R$ {0:F2}'}" 
+                        <Label Text="{Binding Saldo, StringFormat='R$ {0:N2}'}"
                            FontSize="32"
                            FontAttributes="Bold"
                            HorizontalOptions="Center"
@@ -38,7 +38,7 @@
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Entradas" FontSize="14" 
                                TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="{Binding TotalEntradas, StringFormat='R$ {0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="Green"/>
+                            <Label Text="{Binding TotalEntradas, StringFormat='R$ {0:N2}'}" FontSize="20" FontAttributes="Bold" TextColor="Green"/>
                         </VerticalStackLayout>
                     </Border>
 
@@ -47,7 +47,7 @@
                         <VerticalStackLayout Spacing="5">
                             <Label Text="Saídas" FontSize="14" 
                                TextColor="{AppThemeBinding Light={StaticResource Gray700}, Dark={StaticResource Gray300}}"/>
-                            <Label Text="{Binding TotalSaidas, StringFormat='R$ {0:F2}'}" FontSize="20" FontAttributes="Bold" TextColor="Red"/>
+                            <Label Text="{Binding TotalSaidas, StringFormat='R$ {0:N2}'}" FontSize="20" FontAttributes="Bold" TextColor="Red"/>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
@@ -66,7 +66,7 @@
                                 <Grid ColumnDefinitions="*,Auto,Auto" VerticalOptions="Center">
                                     <Label Text="{Binding Descricao}" FontSize="16"
                                        TextColor="{StaticResource TextPrimaryColor}" />
-                                    <Label Text="{Binding Valor, StringFormat='R$ {0:F2}'}" FontSize="16"
+                                    <Label Text="{Binding Valor, StringFormat='R$ {0:N2}'}" FontSize="16"
                                        TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
                                        Grid.Column="1" HorizontalOptions="End"/>
                                     <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14"

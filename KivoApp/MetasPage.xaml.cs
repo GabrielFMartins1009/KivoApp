@@ -10,7 +10,7 @@ namespace KivoApp
         public MetasPage()
         {
             InitializeComponent();
-            MetasCollectionView.ItemsSource = MetaService.ObterMetas();
+            MetasCollectionView.ItemsSource = MetaService.Metas;
 
             // Seta a data atual como padrão
             DataMetaPicker.Date = DateTime.Now;
@@ -62,7 +62,7 @@ namespace KivoApp
 
             // Atualiza CollectionView
             MetasCollectionView.ItemsSource = null;
-            MetasCollectionView.ItemsSource = MetaService.ObterMetas();
+            MetasCollectionView.ItemsSource = MetaService.Metas;
 
             DescricaoEntry.Text = string.Empty;
             ValorAlvoEntry.Text = string.Empty;
