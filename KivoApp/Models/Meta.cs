@@ -1,10 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using SQLite;
 
 namespace KivoApp.Models
 {
     public class Meta : INotifyPropertyChanged
     {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }  // <-- ID único no banco
+
         private string descricao = string.Empty;
         private decimal valorAlvo;
         private decimal valorAtual;

@@ -2,6 +2,7 @@
 using Microsoft.Maui.Controls;
 using Microsoft.Maui;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace KivoApp
@@ -15,7 +16,16 @@ namespace KivoApp
         {
             InitializeComponent();
 
-            // Inicializa dados em background (não bloquear UI)
+            // Inicializa o banco de dados SQLite (configura o caminho do arquivo)
+            string dbPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "KivoApp.db3"
+            );
+
+            // Inicializa o banco de dados estático
+            DatabaseService.Initialize(dbPath);
+
+            // Inicializa dados sem travar a UI
             _ = InitializeDataAsync();
 
 #if WINDOWS
@@ -35,20 +45,30 @@ namespace KivoApp
 
         private async Task InitializeDataAsync()
         {
-            // Carrega transações e metas do armazenamento
-            await TransacaoService.LoadFromStorageAsync();
-            await MetaService.LoadFromStorageAsync();
+            try
+            {
+                // Cria tabelas se não existirem
+                await DatabaseService.InitializeAsync();
 
-            // Atualiza metas com saldo atual (após carregar transações)
-            var saldo = TransacaoService.CalcularSaldo();
-            MetaService.AtualizarMetas(saldo);
+                // Carrega transações e metas do banco
+                await TransacaoService.LoadFromDatabaseAsync();
+                await MetaService.LoadFromDatabaseAsync();
+
+                // Atualiza metas com saldo atual
+                var saldo = TransacaoService.CalcularSaldo();
+                MetaService.AtualizarMetas(saldo);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao inicializar dados: {ex.Message}");
+            }
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-
-            // Retorna a janela com o AppShell como conteúdo
+            // Retorna a janela principal com AppShell
             return new Window(new AppShell());
         }
     }
-}   
+}

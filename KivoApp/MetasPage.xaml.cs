@@ -58,7 +58,7 @@ namespace KivoApp
                 DataMeta = DataMetaPicker.Date
             };
 
-            MetaService.AdicionarMeta(novaMeta);
+           await MetaService.AdicionarMetaAsync(novaMeta);
 
             // Atualiza CollectionView
             MetasCollectionView.ItemsSource = null;

@@ -1,35 +1,45 @@
-﻿using System.Collections.ObjectModel;
-using KivoApp.Models;
+﻿using KivoApp.Models;
+using SQLite;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace KivoApp.Services
 {
     public static class MetaService
     {
-        private static ObservableCollection<Meta> metas = new ObservableCollection<Meta>();
-        public static ObservableCollection<Meta> Metas => metas;
+        public static ObservableCollection<Meta> Metas { get; } = new();
 
-        static MetaService()
+        public static async Task LoadFromDatabaseAsync()
         {
-            metas.CollectionChanged += async (s, e) =>
-            {
-                await DataStorageService.SaveMetasAsync(metas);
-            };
+            var db = DatabaseService.GetConnection();
+            var metas = await db.Table<Meta>().ToListAsync();
+           
+
+
+            Metas.Clear();
+            foreach (var meta in metas)
+                Metas.Add(meta);
         }
 
-        public static void AdicionarMeta(Meta meta) => metas.Add(meta);
-        public static void RemoverMeta(Meta meta) => metas.Remove(meta);
-
-        public static async Task LoadFromStorageAsync()
+        public static async Task AdicionarMetaAsync(Meta meta)
         {
-            var list = await DataStorageService.LoadMetasAsync();
-            metas.Clear();
-            foreach (var m in list) metas.Add(m);
+            var db = DatabaseService.GetConnection();
+            await db.InsertAsync(meta);
+            Metas.Add(meta);
         }
 
+        public static async Task RemoverMetaAsync(Meta meta)
+        {
+            var db = DatabaseService.GetConnection();
+            await db.DeleteAsync(meta);
+            Metas.Remove(meta);
+        }
+
+        // Atualiza valores das metas de acordo com o saldo disponível
         public static void AtualizarMetas(decimal saldoDisponivel)
         {
-            foreach (var meta in metas)
+            foreach (var meta in Metas)
             {
                 meta.ValorAtual = saldoDisponivel >= meta.ValorAlvo ? meta.ValorAlvo : saldoDisponivel;
             }
