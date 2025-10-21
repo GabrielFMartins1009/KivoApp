@@ -1,134 +1,149 @@
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Collections.Specialized;
-using Microsoft.Maui.Controls;
-using KivoApp.Services;
+﻿using Microsoft.Maui.Controls;
 using KivoApp.Models;
+using KivoApp.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Microcharts;
-using SkiaSharp;
+using SkiaSharp; 
 
 namespace KivoApp
 {
     public partial class RelatoriosPage : ContentPage
     {
+        public ObservableCollection<Transacao> Transacoes { get; set; }
+        private ObservableCollection<Transacao> TodasTransacoes { get; set; }
+        public Command<Transacao> ExcluirTransacaoCommand { get; }
+
         public RelatoriosPage()
         {
             InitializeComponent();
-
-            TipoPicker.SelectedIndex = 0; // "Todas"
-            AtualizarTotais();
-            AtualizarListaFiltrada();
-
-            TransacaoService.Transacoes.CollectionChanged += Transacoes_CollectionChanged;
+            Transacoes = new ObservableCollection<Transacao>();
+            TodasTransacoes = new ObservableCollection<Transacao>();
+            ExcluirTransacaoCommand = new Command<Transacao>(async (transacao) => await ExcluirTransacao(transacao));
+            BindingContext = this;
         }
 
-        private void Transacoes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                AtualizarTotais();
-                AtualizarListaFiltrada();
-            });
-        }
-
-        protected override void OnAppearing()
+        protected override async void OnAppearing()
         {
             base.OnAppearing();
-            AtualizarTotais();
-            AtualizarListaFiltrada();
+            await CarregarTransacoes();
+            AtualizarTotaisEGrafico();
         }
 
-        protected override void OnDisappearing()
+        private async Task CarregarTransacoes()
         {
-            TransacaoService.Transacoes.CollectionChanged -= Transacoes_CollectionChanged;
-            base.OnDisappearing();
+            var lista = await DatabaseService.GetTransacoesAsync();
+            TodasTransacoes.Clear();
+            Transacoes.Clear();
+
+            foreach (var t in lista)
+            {
+                TodasTransacoes.Add(t);
+                Transacoes.Add(t);
+            }
+
+            HistoricoCollectionView.ItemsSource = Transacoes;
         }
 
-        private void AtualizarTotais()
+        private async Task ExcluirTransacao(Transacao transacao)
         {
-            var transacoes = TransacaoService.Transacoes;
+            bool confirmar = await DisplayAlert("Confirmação", "Deseja excluir esta transação?", "Sim", "Não");
+            if (confirmar)
+            {
+                await DatabaseService.DeleteTransacaoAsync(transacao);
+                Transacoes.Remove(transacao);
+                TodasTransacoes.Remove(transacao);
+                AtualizarTotaisEGrafico();
+            }
+        }
 
-            // �ltimos 30 dias
-            var corte = DateTime.Now.AddDays(-30);
-            var ultimos30 = transacoes.Where(t => t.Data >= corte).ToList();
+        private async void ExcluirTransacao_Clicked(object sender, EventArgs e)
+        {
+            if (sender is ImageButton button && button.CommandParameter is Transacao transacao)
+            {
+                await ExcluirTransacao(transacao);
+            }
+        }
 
-            var totalEntradas = ultimos30.Where(t => string.Equals(t.Tipo, "Entrada", StringComparison.OrdinalIgnoreCase)).Sum(t => t.Valor);
-            var totalSaidas = ultimos30.Where(t => string.Equals(t.Tipo, "Sa�da", StringComparison.OrdinalIgnoreCase) || string.Equals(t.Tipo, "Saida", StringComparison.OrdinalIgnoreCase)).Sum(t => t.Valor);
-            var saldo = totalEntradas - totalSaidas;
 
-            var cult = new CultureInfo("pt-BR");
-            EntradasLabel.Text = totalEntradas.ToString("C", cult);
-            SaidasLabel.Text = totalSaidas.ToString("C", cult);
-            SaldoLabel.Text = saldo.ToString("C", cult);
+        private void OnTipoPickerChanged(object sender, EventArgs e)
+        {
+            FiltrarTransacoes();
+        }
 
-            // Gr�fico
-            var entries = new System.Collections.Generic.List<ChartEntry>
+        private void OnDataFiltroChanged(object sender, DateChangedEventArgs e)
+        {
+            FiltrarTransacoes();
+        }
+
+        private void FiltrarTransacoes()
+        {
+            if (TodasTransacoes == null || TodasTransacoes.Count == 0)
+                return;
+
+            var tipoSelecionado = TipoPicker.SelectedItem?.ToString() ?? "Todas";
+            var dataInicio = DataInicioPicker.Date;
+            var dataFim = DataFimPicker.Date;
+
+            var filtradas = TodasTransacoes.Where(t =>
+                (tipoSelecionado == "Todas" || t.Tipo == tipoSelecionado) &&
+                t.Data >= dataInicio &&
+                t.Data <= dataFim).ToList();
+
+            Transacoes.Clear();
+            foreach (var t in filtradas)
+                Transacoes.Add(t);
+
+            HistoricoCollectionView.ItemsSource = Transacoes;
+            AtualizarTotaisEGrafico();
+        }
+
+        private void AtualizarTotaisEGrafico()
+        {
+            if (Transacoes.Count == 0)
+            {
+                EntradasLabel.Text = "R$ 0,00";
+                SaidasLabel.Text = "R$ 0,00";
+                SaldoLabel.Text = "R$ 0,00";
+                chartView.Chart = null;
+                return;
+            }
+
+            decimal totalEntradas = Transacoes.Where(t => t.Tipo == "Entradas").Sum(t => t.Valor);
+            decimal totalSaidas = Transacoes.Where(t => t.Tipo == "Saídas").Sum(t => t.Valor);
+            decimal saldo = totalEntradas - totalSaidas;
+
+            EntradasLabel.Text = $"R$ {totalEntradas:N2}";
+            SaidasLabel.Text = $"R$ {totalSaidas:N2}";
+            SaldoLabel.Text = $"R$ {saldo:N2}";
+
+            // Cria o gráfico de rosca (DonutChart)
+            var entries = new[]
             {
                 new ChartEntry((float)totalEntradas)
                 {
                     Label = "Entradas",
-                    ValueLabel = totalEntradas.ToString("N2", cult),
+                    ValueLabel = totalEntradas.ToString("C"),
                     Color = SKColor.Parse("#4CAF50")
                 },
                 new ChartEntry((float)totalSaidas)
                 {
-                    Label = "Sa�das",
-                    ValueLabel = totalSaidas.ToString("N2", cult),
+                    Label = "Saídas",
+                    ValueLabel = totalSaidas.ToString("C"),
                     Color = SKColor.Parse("#F44336")
-                },
-                new ChartEntry((float)saldo)
-                {
-                    Label = "Saldo",
-                    ValueLabel = saldo.ToString("N2", cult),
-                    Color = SKColor.Parse("#2196F3")
                 }
             };
 
             chartView.Chart = new DonutChart
             {
                 Entries = entries,
-                LabelTextSize = 18,
-                HoleRadius = 0.5f
+                HoleRadius = 0.5f,
+                LabelTextSize = 28,
+                BackgroundColor = SKColors.Transparent
             };
-        }
-
-        private void OnTipoPickerChanged(object sender, EventArgs e)
-        {
-            AtualizarListaFiltrada();
-        }
-
-        private void OnDataFiltroChanged(object sender, DateChangedEventArgs e)
-        {
-            AtualizarListaFiltrada();
-        }
-
-        private void AtualizarListaFiltrada()
-        {
-            var transacoes = TransacaoService.Transacoes.AsEnumerable();
-
-            // --- Filtro por Tipo ---
-            string tipoSelecionado = TipoPicker.SelectedItem?.ToString() ?? "Todas";
-
-            if (!string.IsNullOrEmpty(tipoSelecionado) && tipoSelecionado != "Todas")
-            {
-                string tipoNormalizado = tipoSelecionado.TrimEnd('s'); // "Entradas" ? "Entrada"
-                transacoes = transacoes.Where(t =>
-                    string.Equals(t.Tipo, tipoNormalizado, StringComparison.OrdinalIgnoreCase));
-            }
-
-            // --- Filtro por Data ---
-            DateTime dataInicio = DataInicioPicker?.Date ?? DateTime.MinValue;
-            DateTime dataFim = DataFimPicker?.Date ?? DateTime.MaxValue;
-            dataFim = dataFim.AddDays(1).AddTicks(-1); // inclui o dia inteiro
-
-            transacoes = transacoes.Where(t => t.Data >= dataInicio && t.Data <= dataFim);
-
-            // --- Atualiza Lista ---
-            HistoricoCollectionView.ItemsSource = transacoes
-                .OrderByDescending(t => t.Data)
-                .ToList();
         }
     }
 }
+

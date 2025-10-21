@@ -30,6 +30,9 @@ namespace KivoApp.Services
 
         public static async Task RemoverTransacaoAsync(Transacao transacao)
         {
+            if (transacao == null)
+                return;
+
             var db = DatabaseService.GetConnection();
             await db.DeleteAsync(transacao);
             Transacoes.Remove(transacao);
@@ -41,5 +44,7 @@ namespace KivoApp.Services
             decimal saidas = Transacoes.Where(t => t.Tipo == "Saída").Sum(t => t.Valor);
             return entradas - saidas;
         }
+
+
     }
 }
