@@ -30,12 +30,29 @@ namespace KivoApp.Services
 
         public static async Task RemoverTransacaoAsync(Transacao transacao)
         {
-            if (transacao == null)
-                return;
+            if (transacao == null) return;
 
-            var db = DatabaseService.GetConnection();
-            await db.DeleteAsync(transacao);
-            Transacoes.Remove(transacao);
+            await DatabaseService.DeleteTransacaoAsync(transacao);
+            
+            if (Transacoes.Contains(transacao))
+                Transacoes.Remove(transacao);
+                
+            var saldoAtual = CalcularSaldo();
+            await MetaService.AtualizarMetas(saldoAtual);
+            
+            MessagingCenter.Send<object>(null, "AtualizarTudo");
+        }
+
+        // Adicione este método para recarregar dados
+        public static async Task RecarregarDadosAsync()
+        {
+            var transacoes = await DatabaseService.GetTransacoesAsync();
+            Transacoes.Clear();
+            foreach (var t in transacoes.OrderByDescending(x => x.Data))
+                Transacoes.Add(t);
+
+            var saldoAtual = CalcularSaldo();
+            MetaService.AtualizarMetas(saldoAtual);
         }
 
         public static decimal CalcularSaldo()

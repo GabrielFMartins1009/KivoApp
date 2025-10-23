@@ -1,71 +1,104 @@
-using System.Globalization;
 using Microsoft.Maui.Controls;
 using KivoApp.Models;
 using KivoApp.Services;
+using System;
+using System.Collections.ObjectModel; // Adiciona essa linha
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace KivoApp
 {
     public partial class MetasPage : ContentPage
     {
+        public ObservableCollection<Meta> ListaMetas => MetaService.Metas;
+
         public MetasPage()
         {
             InitializeComponent();
-            MetasCollectionView.ItemsSource = MetaService.Metas;
+            BindingContext = this;
 
-            // Seta a data atual como padrão
+            // Escuta atualizações
+            MessagingCenter.Subscribe<object>(this, "MetasAtualizadas", async (_) =>
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    await CarregarMetasAsync();
+                });
+            });
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await CarregarMetasAsync();
+        }
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            MessagingCenter.Unsubscribe<object>(this, "MetasAtualizadas");
+        }
+
+        private async Task CarregarMetasAsync()
+        {
+            try
+            {
+                await MetaService.LoadFromDatabaseAsync();
+                
+                // Atualiza metas com saldo atual
+                var saldoAtual = TransacaoService.CalcularSaldo();
+                await MetaService.AtualizarMetas(saldoAtual);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao carregar metas: {ex.Message}");
+            }
+        }
+
+        private async void SalvarMeta_Clicked(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(DescricaoEntry.Text))
+            {
+                await DisplayAlert("Erro", "Digite uma descrição para a meta.", "OK");
+                return;
+            }
+
+            if (!decimal.TryParse(ValorAlvoEntry.Text?.Replace("R$", "").Trim(), out decimal valorAlvo))
+            {
+                await DisplayAlert("Erro", "Digite um valor válido.", "OK");
+                return;
+            }
+
+            var meta = new Meta
+            {
+                Descricao = DescricaoEntry.Text,
+                ValorAlvo = valorAlvo,
+                DataMeta = DataMetaPicker.Date
+            };
+
+            await MetaService.AdicionarMetaAsync(meta);
+            
+            // Atualiza o valor atual da meta com base no saldo disponível
+            var saldoAtual = TransacaoService.CalcularSaldo();
+            await MetaService.AtualizarMetas(saldoAtual);
+
+            // Limpa os campos
+            DescricaoEntry.Text = string.Empty;
+            ValorAlvoEntry.Text = string.Empty;
             DataMetaPicker.Date = DateTime.Now;
         }
 
         private void ValorAlvoEntry_TextChanged(object sender, TextChangedEventArgs e)
         {
-            FormatarCampoMonetario(ValorAlvoEntry, e);
-        }
-
-        private void FormatarCampoMonetario(Entry entry, TextChangedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(entry.Text))
-                return;
-
-            string apenasNumeros = new string(entry.Text.Where(char.IsDigit).ToArray());
-
-            if (string.IsNullOrEmpty(apenasNumeros))
+            if (sender is Entry entry)
             {
-                entry.Text = string.Empty;
-                return;
+                string texto = entry.Text?.Replace("R$", "").Replace(" ", "").Replace(",", "").Replace(".", "") ?? "0";
+                if (decimal.TryParse(texto, out decimal valor))
+                {
+                    entry.Text = $"R$ {valor / 100:N2}";
+                    entry.CursorPosition = entry.Text.Length;
+                }
             }
-
-            decimal valor = decimal.Parse(apenasNumeros) / 100;
-            entry.Text = string.Format(CultureInfo.GetCultureInfo("pt-BR"), "{0:N2}", valor);
-            entry.CursorPosition = entry.Text.Length;
-        }
-
-        private async void SalvarMeta_Clicked(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(DescricaoEntry.Text) ||
-                string.IsNullOrWhiteSpace(ValorAlvoEntry.Text))
-            {
-                await DisplayAlert("Erro", "Preencha todos os campos!", "OK");
-                return;
-            }
-
-            decimal valorAlvo = decimal.Parse(ValorAlvoEntry.Text, NumberStyles.Currency, CultureInfo.GetCultureInfo("pt-BR"));
-
-            var novaMeta = new Meta
-            {
-                Descricao = DescricaoEntry.Text,
-                ValorAlvo = valorAlvo,
-                ValorAtual = 0,
-                DataMeta = DataMetaPicker.Date
-            };
-
-           await MetaService.AdicionarMetaAsync(novaMeta);
-
-            // Atualiza CollectionView
-            MetasCollectionView.ItemsSource = null;
-            MetasCollectionView.ItemsSource = MetaService.Metas;
-
-            DescricaoEntry.Text = string.Empty;
-            ValorAlvoEntry.Text = string.Empty;
         }
     }
 }

@@ -34,8 +34,21 @@ public partial class MainPage : ContentPage, INotifyPropertyChanged
         InitializeComponent();
         BindingContext = this;
 
-        // escuta mudanças no histórico
+        // Escuta mudanças no histórico
         TransacaoService.Transacoes.CollectionChanged += (s, e) => AtualizarTotais();
+        
+        // Escuta atualizações globais
+        MessagingCenter.Subscribe<object>(this, "AtualizarTudo", async (sender) =>
+        {
+            await TransacaoService.RecarregarDadosAsync();
+            AtualizarTotais();
+        });
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await TransacaoService.RecarregarDadosAsync();
         AtualizarTotais();
     }
 
@@ -56,5 +69,12 @@ public partial class MainPage : ContentPage, INotifyPropertyChanged
     {
         await Navigation.PushAsync(new NovaTransacaoPage());
     
+    }
+
+    // Não esqueça de fazer unsubscribe quando a página for destruída
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        MessagingCenter.Unsubscribe<object>(this, "AtualizarTudo");
     }
 }

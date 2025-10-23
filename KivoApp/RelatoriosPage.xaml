@@ -1,186 +1,199 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage 
-    x:Class="KivoApp.RelatoriosPage"
+<ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:charts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+    xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
     xmlns:model="clr-namespace:KivoApp.Models"
-    BackgroundColor="{StaticResource BackgroundColor}"
+    x:Class="KivoApp.RelatoriosPage"
+    BackgroundColor="#0f1722"
     Title="Relatórios">
 
-    <ScrollView>
+     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Card principal -->
+            <Border
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="#0b1220"
+                Stroke="#374151"
+                StrokeThickness="1"
+                Padding="16">
 
-            <!-- Título -->
-            <Label Text="Relatórios Financeiros"
-                   FontSize="22"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimaryColor}"
-                   HorizontalOptions="Center" />
+                <VerticalStackLayout Spacing="14">
+                    <Label
+                        Text="Resumo dos Últimos 30 Dias"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalOptions="Center" />
 
-            <Label Text="Filtrar por Tipo"
-                   FontSize="12"
-                   TextColor="{StaticResource TextPrimaryColor}"
-                   Margin="0,0,0,5" />
+                    <!-- Filtros -->
+                    <Label Text="Filtrar por Tipo" FontSize="12" TextColor="#cbd5e1" />
+                    <!-- Substitua o Border do Picker por este -->
+                    <Border 
+                        StrokeThickness="0" 
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="#071021"
+                        Padding="8,0">
+                        <Picker x:Name="TipoPicker"
+                                Title="Selecione o tipo"
+                                SelectedIndexChanged="OnTipoPickerChanged"
+                                TextColor="White"
+                                TitleColor="#888888"
+                                BackgroundColor="Transparent"
+                                FontSize="14"
+                                Margin="4,0" />
+                    </Border>
 
-            <Border StrokeThickness="0"
-                    StrokeShape="RoundRectangle 10"
-                    BackgroundColor="{StaticResource CardColor}"
-                    Padding="5,0">
+                    <!-- Data Picker Grid -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <!-- Data Início -->
+                        <VerticalStackLayout Grid.Column="0">
+                            <Label Text="Data Início" 
+                                   TextColor="#cbd5e1" 
+                                   FontSize="12" />
+                            <Border StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="#071021"
+                                    Padding="4">
+                                <DatePicker x:Name="DataInicioPicker"
+                                          DateSelected="OnDataFiltroChanged"
+                                          TextColor="White"
+                                          BackgroundColor="Transparent" />
+                            </Border>
+                        </VerticalStackLayout>
 
-                <Picker x:Name="TipoPicker"
-                        Title="Selecione o tipo"
-                        SelectedIndexChanged="OnTipoPickerChanged"
-                        TextColor="{StaticResource TextPrimaryColor}"
-                        TitleColor="#888888"
-                        BackgroundColor="Transparent"
-                        FontSize="14">
-                    <Picker.ItemsSource>
-                        <x:Array Type="{x:Type x:String}">
-                            <x:String>Todas</x:String>
-                            <x:String>Entradas</x:String>
-                            <x:String>Saídas</x:String>
-                        </x:Array>
-                    </Picker.ItemsSource>
-                </Picker>
+                        <!-- Data Fim -->
+                        <VerticalStackLayout Grid.Column="1">
+                            <Label Text="Data Fim" 
+                                   TextColor="#cbd5e1" 
+                                   FontSize="12" />
+                            <Border StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="#071021"
+                                    Padding="4">
+                                <DatePicker x:Name="DataFimPicker"
+                                          DateSelected="OnDataFiltroChanged"
+                                          TextColor="White"
+                                          BackgroundColor="Transparent" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Saldo movido para cima -->
+                    <Border
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="#071021"
+                        Padding="16"
+                        Margin="0,4,0,0">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Saldo Atual"
+                                   FontSize="14"
+                                   TextColor="#cbd5e1"
+                                   HorizontalOptions="Center" />
+                            <Label x:Name="SaldoLabel"
+                                   Text="R$ 0,00"
+                                   FontSize="24"
+                                   FontAttributes="Bold"
+                                   TextColor="White"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Legenda Entradas/Saídas -->
+                    <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
+                        <VerticalStackLayout Grid.Column="0" Spacing="6" Padding="8">
+                            <HorizontalStackLayout Spacing="8">
+                                <BoxView Color="#F44336" 
+                                        WidthRequest="16" 
+                                        HeightRequest="16" 
+                                        CornerRadius="2" />
+                                <Label Text="Saídas" 
+                                       TextColor="White" 
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Label x:Name="LegendaSaidasValue" 
+                                   Text="R$ 0,00" 
+                                   TextColor="White" 
+                                   FontAttributes="Bold" 
+                                   Margin="24,0,0,0" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Grid.Column="1" 
+                                           Spacing="6" 
+                                           Padding="8" 
+                                           HorizontalOptions="End">
+                            <HorizontalStackLayout Spacing="8">
+                                <BoxView Color="#4CAF50" 
+                                        WidthRequest="16" 
+                                        HeightRequest="16" 
+                                        CornerRadius="2" />
+                                <Label Text="Entradas" 
+                                       TextColor="White" 
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                            <Label x:Name="LegendaEntradasValue" 
+                                   Text="R$ 0,00" 
+                                   TextColor="White" 
+                                   FontAttributes="Bold" />
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <!-- Gráfico sem labels -->
+                    <Border
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="#071021"
+                        Padding="12">
+                        <microcharts:ChartView
+                            x:Name="chartView"
+                            HeightRequest="200"
+                            BackgroundColor="Transparent"
+                            HorizontalOptions="Fill" />
+                    </Border>
+                </VerticalStackLayout>
             </Border>
 
-            <!-- Filtro por Data -->
-            <HorizontalStackLayout Spacing="10">
-                <!-- Data Início -->
-                <VerticalStackLayout>
-                    <Label Text="Data Início" TextColor="{StaticResource TextPrimaryColor}" FontSize="12"/>
-                    <AbsoluteLayout HeightRequest="45">
-                        <DatePicker x:Name="DataInicioPicker"
-                                    DateSelected="OnDataFiltroChanged"
-                                    TextColor="{StaticResource TextPrimaryColor}"
-                                    BackgroundColor="Transparent"/>
-                        <Label x:Name="PlaceholderInicio"
-                               TextColor="#777"
-                               FontSize="14"
-                               VerticalOptions="Center"
-                               Margin="10,0,0,0"
-                               InputTransparent="True"
-                               IsVisible="True"/>
-                    </AbsoluteLayout>
-                </VerticalStackLayout>
-
-                <!-- Data Fim -->
-                <VerticalStackLayout>
-                    <Label Text="Data Fim" TextColor="{StaticResource TextPrimaryColor}" FontSize="12"/>
-                    <AbsoluteLayout HeightRequest="45">
-                        <DatePicker x:Name="DataFimPicker"
-                                    DateSelected="OnDataFiltroChanged"
-                                    TextColor="{StaticResource TextPrimaryColor}"
-                                    BackgroundColor="Transparent"/>
-                        <Label x:Name="PlaceholderFim"
-                               TextColor="#777"
-                               FontSize="14"
-                               VerticalOptions="Center"
-                               Margin="10,0,0,0"
-                               InputTransparent="True"
-                               IsVisible="True"/>
-                    </AbsoluteLayout>
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-
-            <!-- Totais -->
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-
-                <Border StrokeThickness="0" Background="{StaticResource CardColor}" StrokeShape="RoundRectangle 10" Padding="12">
-                    <VerticalStackLayout HorizontalOptions="Center">
-                        <Label Text="Entradas" FontSize="14" TextColor="Green"/>
-                        <Label x:Name="EntradasLabel" Text="R$ 0,00"
-                               FontSize="18" FontAttributes="Bold"
-                               TextColor="{StaticResource TextPrimaryColor}" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border StrokeThickness="0" Background="{StaticResource CardColor}" StrokeShape="RoundRectangle 10" Padding="12">
-                    <VerticalStackLayout HorizontalOptions="Center">
-                        <Label Text="Saídas" FontSize="14" TextColor="Red"/>
-                        <Label x:Name="SaidasLabel" Text="R$ 0,00"
-                               FontSize="18" FontAttributes="Bold"
-                               TextColor="{StaticResource TextPrimaryColor}" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border StrokeThickness="0" Background="{StaticResource CardColor}" StrokeShape="RoundRectangle 10" Padding="12">
-                    <VerticalStackLayout HorizontalOptions="Center">
-                        <Label Text="Saldo" FontSize="14" TextColor="#2196F3"/>
-                        <Label x:Name="SaldoLabel" Text="R$ 0,00"
-                               FontSize="18" FontAttributes="Bold"
-                               TextColor="{StaticResource TextPrimaryColor}" />
-                    </VerticalStackLayout>
-                </Border>
-            </Grid>
-
-            <!-- Gráfico -->
-            <Border StrokeThickness="0"
-                    Background="{StaticResource CardColor}"
-                    StrokeShape="RoundRectangle 10"
-                    Padding="10">
-                <VerticalStackLayout>
-                    <Label Text="Resumo dos Últimos 30 Dias"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           HorizontalOptions="Center"
-                           TextColor="{StaticResource TextPrimaryColor}"/>
-                    <charts:ChartView x:Name="chartView"
-                                      HeightRequest="200"
-                                      Margin="0,10,0,0" />
-                </VerticalStackLayout>
-            </Border>
-
-            <!-- Histórico de Transações -->
+            <!-- Lista de Transações -->
             <Label Text="Histórico de Transações"
                    FontSize="18"
                    FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimaryColor}"
-                   Margin="0,10,0,0"/>
+                   TextColor="White" />
 
             <CollectionView x:Name="HistoricoCollectionView"
-                            SelectionMode="None"
-                            VerticalOptions="Fill">
-
+                           SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Transacao">
                         <Border StrokeThickness="0"
-                                Background="{StaticResource CardColor}"
+                                Background="#071021"
                                 StrokeShape="RoundRectangle 10"
-                                Padding="10"
-                                Margin="0,0,0,10">
-
-                            <Grid ColumnDefinitions="2*,Auto" VerticalOptions="Center">
-                                <VerticalStackLayout>
+                                Padding="12"
+                                Margin="0,0,0,8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="4">
                                     <Label Text="{Binding Descricao}"
                                            FontSize="16"
                                            FontAttributes="Bold"
-                                           TextColor="{StaticResource TextPrimaryColor}" />
+                                           TextColor="White" />
                                     <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy}'}"
                                            FontSize="12"
-                                           TextColor="{StaticResource TextSecondaryColor}" />
+                                           TextColor="#9ca3af" />
                                 </VerticalStackLayout>
 
-                                <HorizontalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="10">
+                                <HorizontalStackLayout Grid.Column="1" 
+                                                     Spacing="12"
+                                                     VerticalOptions="Center">
                                     <Label Text="{Binding Valor, StringFormat='R$ {0:N2}'}"
                                            FontSize="16"
-                                           TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}"
-                                           VerticalOptions="Center" />
-
+                                           TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}" />
                                     <ImageButton Source="trash.png"
-                                                 CommandParameter="{Binding .}"
-                                                 WidthRequest="24" HeightRequest="24"
-                                                 Clicked="ExcluirTransacao_Clicked"
-                                                 BackgroundColor="Transparent"
-                                                 VerticalOptions="Center"/>
+                                               CommandParameter="{Binding .}"
+                                               Clicked="ExcluirTransacao_Clicked"
+                                               WidthRequest="24"
+                                               HeightRequest="24"
+                                               BackgroundColor="Transparent" />
                                 </HorizontalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
