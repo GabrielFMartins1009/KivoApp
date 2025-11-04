@@ -20,13 +20,13 @@ namespace KivoApp
             InitializeComponent();
             BindingContext = this;
 
-            // Inicializa as opções do Picker
+            // Inicializa opções do Picker
             TipoPicker.ItemsSource = new List<string> { "Todas", "Entrada", "Saída" };
             TipoPicker.SelectedIndex = 0;
 
             HistoricoCollectionView.ItemsSource = ListaFiltrada;
 
-            // Escuta atualizações
+            // Escuta mensagens de atualização global
             MessagingCenter.Subscribe<object>(this, "AtualizarTudo", async (_) =>
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -50,7 +50,7 @@ namespace KivoApp
             MessagingCenter.Unsubscribe<object>(this, "AtualizarTudo");
         }
 
-        // 🔹 Carrega todas as transações do banco
+        // 🔹 Carrega todas as transações
         private async Task CarregarTransacoesAsync()
         {
             try
@@ -74,62 +74,79 @@ namespace KivoApp
             }
         }
 
-        // 🔹 Exclui uma transação
-        private async Task ExcluirTransacaoAsync(Transacao transacao)
+        // 🔹 Exclui uma transação (com logs e atualização automática)
+        private async void ExcluirTransacao_Clicked(object sender, EventArgs e)
         {
-            if (transacao == null) return;
-
             try
             {
-                bool confirmar = await DisplayAlert("Confirmação", "Deseja excluir esta transação?", "Sim", "Não");
+                System.Diagnostics.Debug.WriteLine($"[ExcluirTransacao_Clicked] sender type: {(sender?.GetType().FullName ?? "null")}");
+
+                object? param = null;
+
+                if (sender is ImageButton ib)
+                {
+                    param = ib.CommandParameter;
+                    System.Diagnostics.Debug.WriteLine("[ExcluirTransacao_Clicked] sender is ImageButton");
+                }
+                else if (sender is Button btn)
+                {
+                    param = btn.CommandParameter;
+                    System.Diagnostics.Debug.WriteLine("[ExcluirTransacao_Clicked] sender is Button");
+                }
+                else if (sender is VisualElement ve)
+                {
+                    param = ve.BindingContext;
+                    System.Diagnostics.Debug.WriteLine("[ExcluirTransacao_Clicked] sender is VisualElement (fallback BindingContext)");
+                }
+
+                if (param == null)
+                {
+                    await DisplayAlert("Erro", "Transação inválida para exclusão (parâmetro nulo).", "OK");
+                    return;
+                }
+
+                Transacao? transacao = param as Transacao ?? (sender as VisualElement)?.BindingContext as Transacao;
+                if (transacao == null)
+                {
+                    await DisplayAlert("Erro", "Não foi possível identificar a transação.", "OK");
+                    return;
+                }
+
+                bool confirmar = await DisplayAlert("Confirmação", $"Deseja realmente excluir '{transacao.Descricao}'?", "Sim", "Não");
                 if (!confirmar) return;
 
-                // Remove do banco primeiro
-                await DatabaseService.DeleteTransacaoAsync(transacao);
+                int linhasAfetadas = await DatabaseService.DeleteTransacaoAsync(transacao);
+                bool sucesso = linhasAfetadas > 0;
 
-                // Atualiza a UI imediatamente na thread principal
-                await MainThread.InvokeOnMainThreadAsync(() =>
+
+                if (sucesso)
                 {
-                    // Remove das coleções locais
-                    if (TodasTransacoes.Contains(transacao))
-                        TodasTransacoes.Remove(transacao);
-                    if (ListaFiltrada.Contains(transacao))
-                        ListaFiltrada.Remove(transacao);
-                });
-
-                // Remove do serviço e notifica outras páginas
-                if (TransacaoService.Transacoes.Contains(transacao))
-                    TransacaoService.Transacoes.Remove(transacao);
-
-                // Atualiza visuais
-                await MainThread.InvokeOnMainThreadAsync(() =>
-                {
+                    // Remove da lista e atualiza UI
+                    TodasTransacoes.Remove(transacao);
+                    ListaFiltrada.Remove(transacao);
                     AtualizarTotaisEGrafico();
-                    HistoricoCollectionView.ItemsSource = null;
-                    HistoricoCollectionView.ItemsSource = ListaFiltrada;
-                });
 
-                // Notifica outras páginas
-                var saldoAtual = TransacaoService.CalcularSaldo();
-                await MetaService.AtualizarMetas(saldoAtual);
-                MessagingCenter.Send<object>(this, "AtualizarTudo");
+                    // Atualiza metas automaticamente
+                    MessagingCenter.Send<object>(this, "AtualizarMetas");
+
+                    await DisplayAlert("Sucesso", "Transação excluída com sucesso!", "OK");
+                }
+                else
+                {
+                    await DisplayAlert("Erro", "Ocorreu um problema ao excluir a transação.", "OK");
+                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Erro ao excluir transação: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ExcluirTransacao_Clicked] EXCEPTION: {ex}");
+                await DisplayAlert("Erro", $"Falha ao excluir: {ex.Message}", "OK");
             }
-        }
-
-        private async void ExcluirTransacao_Clicked(object sender, EventArgs e)
-        {
-            if (sender is ImageButton button && button.CommandParameter is Transacao transacao)
-                await ExcluirTransacaoAsync(transacao);
         }
 
         private void OnTipoPickerChanged(object sender, EventArgs e) => FiltrarTransacoes();
         private void OnDataFiltroChanged(object sender, DateChangedEventArgs e) => FiltrarTransacoes();
 
-        // 🔹 Filtro de tipo e data
+        // 🔹 Filtro por tipo e data
         private void FiltrarTransacoes()
         {
             if (TodasTransacoes.Count == 0)
@@ -158,11 +175,8 @@ namespace KivoApp
                         .ToList();
 
                     ListaFiltrada.Clear();
-                    
                     foreach (var t in filtradas)
-                    {
                         ListaFiltrada.Add(t);
-                    }
 
                     AtualizarTotaisEGrafico();
                 }
@@ -173,21 +187,7 @@ namespace KivoApp
             });
         }
 
-        private bool TipoCombina(string? tipoRegistro, string tipoSelecionado)
-        {
-            if (string.IsNullOrWhiteSpace(tipoRegistro)) return false;
-
-            string reg = tipoRegistro.ToLowerInvariant();
-            string sel = tipoSelecionado.ToLowerInvariant();
-
-            if (sel.Contains("todas")) return true;
-            if (sel.Contains("entrada")) return reg.Contains("entrada");
-            if (sel.Contains("saída") || sel.Contains("saida")) return reg.Contains("saída") || reg.Contains("saida");
-
-            return reg == sel;
-        }
-
-        // 🔹 Atualiza totais, legenda custom e gráfico
+        // 🔹 Atualiza totais e gráfico
         private void AtualizarTotaisEGrafico()
         {
             if (ListaFiltrada.Count == 0)
@@ -228,7 +228,7 @@ namespace KivoApp
                 Entries = entries,
                 HoleRadius = 0.5f,
                 BackgroundColor = SKColors.Transparent,
-                LabelMode = Microcharts.LabelMode.None // Remove os labels do gráfico
+                LabelMode = Microcharts.LabelMode.None
             };
         }
 

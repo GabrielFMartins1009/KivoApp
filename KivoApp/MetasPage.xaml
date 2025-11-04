@@ -10,60 +10,81 @@
     <ScrollView>
         <VerticalStackLayout Padding="20" Spacing="20">
 
-            <Label Text="Metas Financeiras" FontSize="28" FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimaryColor}" HorizontalOptions="Center" />
+            <Label Text="Metas Financeiras"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimaryColor}"
+                   HorizontalOptions="Center" />
 
             <!-- Formulário -->
-            <Entry x:Name="DescricaoEntry" Placeholder="Descrição da Meta"
+            <Entry x:Name="DescricaoEntry"
+                   Placeholder="Descrição da Meta"
                    Keyboard="Default"
                    BackgroundColor="{StaticResource CardColor}"
                    TextColor="{StaticResource TextPrimaryColor}" />
 
-            <Entry x:Name="ValorAlvoEntry" Placeholder="Valor Alvo (R$)"
+            <Entry x:Name="ValorAlvoEntry"
+                   Placeholder="Valor Alvo (R$)"
                    Keyboard="Numeric"
-                   BackgroundColor="{StaticResource CardColor}" 
+                   BackgroundColor="{StaticResource CardColor}"
                    TextColor="{StaticResource TextPrimaryColor}"
-                   TextChanged="ValorAlvoEntry_TextChanged"/>
+                   TextChanged="ValorAlvoEntry_TextChanged" />
 
             <DatePicker x:Name="DataMetaPicker" />
 
-            <Button Text="Salvar Meta" Clicked="SalvarMeta_Clicked"
-                    BackgroundColor="{StaticResource PrimaryColor}" TextColor="White" />
+            <Button Text="Salvar Meta"
+                    Clicked="SalvarMeta_Clicked"
+                    BackgroundColor="{StaticResource PrimaryColor}"
+                    TextColor="White" />
 
             <!-- Lista de metas -->
-            <CollectionView x:Name="MetasCollectionView" 
-                          ItemsSource="{Binding ListaMetas}"
-                          Margin="0,20,0,0"
-                          SelectionMode="None">
+            <CollectionView x:Name="MetasCollectionView"
+                            ItemsSource="{Binding ListaMetas}"
+                            Margin="0,20,0,0"
+                            SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="model:Meta">
-                        <Border Padding="10" 
-                               StrokeShape="RoundRectangle 12"
-                               Background="{StaticResource CardColor}" 
-                               Margin="0,0,0,10">
-                            <VerticalStackLayout Spacing="5">
-                                <Label Text="{Binding Descricao}" 
-                                       FontSize="16" 
-                                       TextColor="{StaticResource TextPrimaryColor}" />
-                                <Label Text="{Binding ValorAtual, StringFormat='Atual: R$ {0:N2}'}" 
-                                       FontSize="14" 
-                                       TextColor="Green"/>
-                                <Label Text="{Binding ValorAlvo, StringFormat='Alvo: R$ {0:N2}'}" 
-                                       FontSize="14" 
-                                       TextColor="Blue"/>
-                                <Label Text="{Binding Progresso}" 
-                                       FontSize="14" 
-                                       TextColor="{StaticResource Primary}"/>
+                        <Border Padding="10"
+                                StrokeShape="RoundRectangle 12"
+                                Background="{StaticResource CardColor}"
+                                Margin="0,0,0,10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <!-- Coluna 1: Detalhes da meta -->
+                                <VerticalStackLayout Spacing="5">
+                                    <Label Text="{Binding Descricao}"
+                                           FontSize="16"
+                                           TextColor="{StaticResource TextPrimaryColor}" />
+                                    <Label Text="{Binding ValorAtual, StringFormat='Atual: R$ {0:N2}'}"
+                                           FontSize="14"
+                                           TextColor="Green" />
+                                    <Label Text="{Binding ValorAlvo, StringFormat='Alvo: R$ {0:N2}'}"
+                                           FontSize="14"
+                                           TextColor="Blue" />
+                                    <Label Text="{Binding Progresso}"
+                                           FontSize="14"
+                                           TextColor="{StaticResource Primary}" />
 
-                                <ProgressBar Progress="{Binding Porcentagem}" 
-                                           ProgressColor="#4CAF50"
-                                           HeightRequest="8"
-                                           BackgroundColor="#333333"/>
+                                    <ProgressBar Progress="{Binding Porcentagem}"
+                                                 ProgressColor="#4CAF50"
+                                                 HeightRequest="8"
+                                                 BackgroundColor="#333333" />
 
-                                <Label Text="{Binding DataMeta, StringFormat='Data: {0:dd/MM/yyyy}'}" 
-                                       FontSize="12" 
-                                       TextColor="{StaticResource TextSecondaryColor}"/>
-                            </VerticalStackLayout>
+                                    <Label Text="{Binding DataMeta, StringFormat='Data: {0:dd/MM/yyyy}'}"
+                                           FontSize="12"
+                                           TextColor="{StaticResource TextSecondaryColor}" />
+                                </VerticalStackLayout>
+
+                                <!-- Coluna 2: Botão Excluir -->
+                                <ImageButton Grid.Column="1"
+                                             Source="trash.png"
+                                             WidthRequest="28"
+                                             HeightRequest="28"
+                                             BackgroundColor="Transparent"
+                                             CommandParameter="{Binding .}"
+                                             Clicked="ExcluirMeta_Clicked"
+                                             HorizontalOptions="End"
+                                             VerticalOptions="Start" />
+                            </Grid>
                         </Border>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

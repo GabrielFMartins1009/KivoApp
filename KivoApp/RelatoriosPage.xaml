@@ -182,12 +182,17 @@
                                     <Label Text="{Binding Valor, StringFormat='R$ {0:N2}'}"
                                            FontSize="16"
                                            TextColor="{Binding Tipo, Converter={StaticResource TipoToColorConverter}}" />
-                                    <ImageButton Source="trash.png"
-                                               CommandParameter="{Binding .}"
-                                               Clicked="ExcluirTransacao_Clicked"
-                                               WidthRequest="24"
-                                               HeightRequest="24"
-                                               BackgroundColor="Transparent" />
+                                    <ImageButton
+                                            Source="trash.png"
+                                            Clicked="ExcluirTransacao_Clicked"
+                                            CommandParameter="{Binding .}"
+                                            BackgroundColor="Transparent"
+                                            WidthRequest="28"
+                                            HeightRequest="28"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Center" />
+
+
                                 </HorizontalStackLayout>
                             </Grid>
                         </Border>

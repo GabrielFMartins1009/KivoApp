@@ -32,16 +32,22 @@ namespace KivoApp.Services
         {
             if (transacao == null) return;
 
+            // delete do banco
             await DatabaseService.DeleteTransacaoAsync(transacao);
-            
+
+            // remove da coleção global (se existir)
             if (Transacoes.Contains(transacao))
                 Transacoes.Remove(transacao);
-                
-            var saldoAtual = CalcularSaldo();
-            await MetaService.AtualizarMetas(saldoAtual);
-            
+
+            // Recalcula saldo e atualiza metas (centralizado)
+            await RecalcularSaldoEAtualizarMetasAsync();
+
+            // notifica outras coisas que queiram escutar atualização geral
             MessagingCenter.Send<object>(null, "AtualizarTudo");
+
+            System.Diagnostics.Debug.WriteLine($"[TransacaoService] Transacao removida: {transacao.Id}");
         }
+
 
         // Adicione este método para recarregar dados
         public static async Task RecarregarDadosAsync()
@@ -61,6 +67,18 @@ namespace KivoApp.Services
             decimal saidas = Transacoes.Where(t => t.Tipo == "Saída").Sum(t => t.Valor);
             return entradas - saidas;
         }
+
+        // chama quando quiser recalcular e atualizar metas
+        public static async Task RecalcularSaldoEAtualizarMetasAsync()
+        {
+            var saldoAtual = CalcularSaldo();
+            await MetaService.AtualizarMetas(saldoAtual);
+            System.Diagnostics.Debug.WriteLine($"[TransacaoService] Saldo recalculado: {saldoAtual}");
+            // Notifica telas interessadas (MetasPage deve escutar "MetasAtualizadas")
+            MessagingCenter.Send<object>(null, "MetasAtualizadas");
+        }
+
+      
 
 
     }

@@ -52,11 +52,12 @@ namespace KivoApp.Services
             foreach (var meta in Metas)
             {
                 meta.ValorAtual = saldoDisponivel >= meta.ValorAlvo ? meta.ValorAlvo : saldoDisponivel;
-                await DatabaseService.SaveMetaAsync(meta); // Salva as alterações no banco
+                await DatabaseService.SaveMetaAsync(meta);
             }
-            
-            // Notifica que as metas foram atualizadas
+
+            System.Diagnostics.Debug.WriteLine("[MetaService] Metas atualizadas com saldo: " + saldoDisponivel);
             MessagingCenter.Send<object>(null, "MetasAtualizadas");
         }
+
     }
 }

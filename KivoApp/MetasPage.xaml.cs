@@ -2,7 +2,7 @@ using Microsoft.Maui.Controls;
 using KivoApp.Models;
 using KivoApp.Services;
 using System;
-using System.Collections.ObjectModel; // Adiciona essa linha
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Linq;
 
@@ -17,13 +17,10 @@ namespace KivoApp
             InitializeComponent();
             BindingContext = this;
 
-            // Escuta atualizações
+            // Escuta atualizações das metas
             MessagingCenter.Subscribe<object>(this, "MetasAtualizadas", async (_) =>
             {
-                await MainThread.InvokeOnMainThreadAsync(async () =>
-                {
-                    await CarregarMetasAsync();
-                });
+                await MainThread.InvokeOnMainThreadAsync(async () => await CarregarMetasAsync());
             });
         }
 
@@ -37,6 +34,8 @@ namespace KivoApp
         {
             base.OnDisappearing();
             MessagingCenter.Unsubscribe<object>(this, "MetasAtualizadas");
+            MessagingCenter.Unsubscribe<object>(this, "AtualizarTudo");
+
         }
 
         private async Task CarregarMetasAsync()
@@ -44,8 +43,8 @@ namespace KivoApp
             try
             {
                 await MetaService.LoadFromDatabaseAsync();
-                
-                // Atualiza metas com saldo atual
+
+                // Atualiza metas com base no saldo atual
                 var saldoAtual = TransacaoService.CalcularSaldo();
                 await MetaService.AtualizarMetas(saldoAtual);
             }
@@ -63,7 +62,7 @@ namespace KivoApp
                 return;
             }
 
-            if (!decimal.TryParse(ValorAlvoEntry.Text?.Replace("R$", "").Trim(), out decimal valorAlvo))
+            if (!decimal.TryParse(ValorAlvoEntry.Text?.Replace("R$", "").Replace(" ", ""), out decimal valorAlvo))
             {
                 await DisplayAlert("Erro", "Digite um valor válido.", "OK");
                 return;
@@ -71,18 +70,18 @@ namespace KivoApp
 
             var meta = new Meta
             {
-                Descricao = DescricaoEntry.Text,
+                Descricao = DescricaoEntry.Text.Trim(),
                 ValorAlvo = valorAlvo,
                 DataMeta = DataMetaPicker.Date
             };
 
             await MetaService.AdicionarMetaAsync(meta);
-            
-            // Atualiza o valor atual da meta com base no saldo disponível
+
+            // Atualiza metas considerando o saldo atual
             var saldoAtual = TransacaoService.CalcularSaldo();
             await MetaService.AtualizarMetas(saldoAtual);
 
-            // Limpa os campos
+            // Limpa os campos após salvar
             DescricaoEntry.Text = string.Empty;
             ValorAlvoEntry.Text = string.Empty;
             DataMetaPicker.Date = DateTime.Now;
@@ -93,12 +92,43 @@ namespace KivoApp
             if (sender is Entry entry)
             {
                 string texto = entry.Text?.Replace("R$", "").Replace(" ", "").Replace(",", "").Replace(".", "") ?? "0";
+
                 if (decimal.TryParse(texto, out decimal valor))
                 {
+                    // formata enquanto digita
                     entry.Text = $"R$ {valor / 100:N2}";
                     entry.CursorPosition = entry.Text.Length;
                 }
             }
         }
+        private async void ExcluirMeta_Clicked(object sender, EventArgs e)
+        {
+            if (sender is Button button && button.BindingContext is Meta metaSelecionada)
+            {
+                bool confirmar = await DisplayAlert(
+                    "Excluir Meta",
+                    $"Deseja realmente excluir a meta \"{metaSelecionada.Descricao}\"?",
+                    "Sim", "Cancelar");
+
+                if (confirmar)
+                {
+                    try
+                    {
+                        await MetaService.RemoverMetaAsync(metaSelecionada);
+
+                        // Atualiza a lista após exclusão
+                        await CarregarMetasAsync();
+
+                        await DisplayAlert("Sucesso", "Meta excluída com sucesso!", "OK");
+                    }
+                    catch (Exception ex)
+                    {
+                        await DisplayAlert("Erro", $"Falha ao excluir meta: {ex.Message}", "OK");
+                    }
+                }
+            }
+        }
+
     }
+
 }
