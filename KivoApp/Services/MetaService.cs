@@ -56,8 +56,7 @@ namespace KivoApp.Services
             }
 
             System.Diagnostics.Debug.WriteLine("[MetaService] Metas atualizadas com saldo: " + saldoDisponivel);
-            MessagingCenter.Send<object>(null, "MetasAtualizadas");
-        }
 
+        }
     }
 }

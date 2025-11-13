@@ -1,10 +1,9 @@
-using Microsoft.Maui.Controls;
+Ôªøusing Microsoft.Maui.Controls;
 using KivoApp.Models;
 using KivoApp.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Linq;
 
 namespace KivoApp
 {
@@ -16,17 +15,24 @@ namespace KivoApp
         {
             InitializeComponent();
             BindingContext = this;
-
-            // Escuta atualizaÁıes das metas
-            MessagingCenter.Subscribe<object>(this, "MetasAtualizadas", async (_) =>
-            {
-                await MainThread.InvokeOnMainThreadAsync(async () => await CarregarMetasAsync());
-            });
         }
 
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+
+            // Inscreve-se nos eventos (antes de carregar)
+            MessagingCenter.Subscribe<object>(this, "MetasAtualizadas", async (_) =>
+            {
+                await AtualizarMetasUIAsync();
+            });
+
+            MessagingCenter.Subscribe<object>(this, "AtualizarTudo", async (_) =>
+            {
+                await AtualizarMetasUIAsync();
+            });
+
+            // Carrega metas na primeira apari√ß√£o
             await CarregarMetasAsync();
         }
 
@@ -35,7 +41,15 @@ namespace KivoApp
             base.OnDisappearing();
             MessagingCenter.Unsubscribe<object>(this, "MetasAtualizadas");
             MessagingCenter.Unsubscribe<object>(this, "AtualizarTudo");
+        }
 
+        private async Task AtualizarMetasUIAsync()
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                var saldoAtual = TransacaoService.CalcularSaldo();
+                await MetaService.AtualizarMetas(saldoAtual);
+            });
         }
 
         private async Task CarregarMetasAsync()
@@ -58,13 +72,13 @@ namespace KivoApp
         {
             if (string.IsNullOrWhiteSpace(DescricaoEntry.Text))
             {
-                await DisplayAlert("Erro", "Digite uma descriÁ„o para a meta.", "OK");
+                await DisplayAlert("Erro", "Digite uma descri√ß√£o para a meta.", "OK");
                 return;
             }
 
             if (!decimal.TryParse(ValorAlvoEntry.Text?.Replace("R$", "").Replace(" ", ""), out decimal valorAlvo))
             {
-                await DisplayAlert("Erro", "Digite um valor v·lido.", "OK");
+                await DisplayAlert("Erro", "Digite um valor v√°lido.", "OK");
                 return;
             }
 
@@ -81,7 +95,7 @@ namespace KivoApp
             var saldoAtual = TransacaoService.CalcularSaldo();
             await MetaService.AtualizarMetas(saldoAtual);
 
-            // Limpa os campos apÛs salvar
+            // Limpa os campos ap√≥s salvar
             DescricaoEntry.Text = string.Empty;
             ValorAlvoEntry.Text = string.Empty;
             DataMetaPicker.Date = DateTime.Now;
@@ -95,15 +109,15 @@ namespace KivoApp
 
                 if (decimal.TryParse(texto, out decimal valor))
                 {
-                    // formata enquanto digita
                     entry.Text = $"R$ {valor / 100:N2}";
                     entry.CursorPosition = entry.Text.Length;
                 }
             }
         }
+
         private async void ExcluirMeta_Clicked(object sender, EventArgs e)
         {
-            if (sender is Button button && button.BindingContext is Meta metaSelecionada)
+            if (sender is ImageButton button && button.CommandParameter is Meta metaSelecionada)
             {
                 bool confirmar = await DisplayAlert(
                     "Excluir Meta",
@@ -116,10 +130,10 @@ namespace KivoApp
                     {
                         await MetaService.RemoverMetaAsync(metaSelecionada);
 
-                        // Atualiza a lista apÛs exclus„o
+                        // Atualiza lista ap√≥s exclus√£o
                         await CarregarMetasAsync();
 
-                        await DisplayAlert("Sucesso", "Meta excluÌda com sucesso!", "OK");
+                        await DisplayAlert("Sucesso", "Meta exclu√≠da com sucesso!", "OK");
                     }
                     catch (Exception ex)
                     {
@@ -128,7 +142,5 @@ namespace KivoApp
                 }
             }
         }
-
     }
-
 }

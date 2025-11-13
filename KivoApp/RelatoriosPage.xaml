@@ -77,7 +77,7 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <!-- Saldo movido para cima -->
+                    <!-- Saldo -->
                     <Border
                         StrokeShape="RoundRectangle 10"
                         BackgroundColor="#071021"
@@ -136,7 +136,7 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <!-- Gráfico sem labels -->
+                    <!-- Gráfico -->
                     <Border
                         StrokeShape="RoundRectangle 10"
                         BackgroundColor="#071021"

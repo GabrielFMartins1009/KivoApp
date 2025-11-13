@@ -43,7 +43,7 @@ namespace KivoApp.Services
             await RecalcularSaldoEAtualizarMetasAsync();
 
             // notifica outras coisas que queiram escutar atualização geral
-            MessagingCenter.Send<object>(null, "AtualizarTudo");
+            MessagingCenter.Send(new object(), "AtualizarTudo");
 
             System.Diagnostics.Debug.WriteLine($"[TransacaoService] Transacao removida: {transacao.Id}");
         }
@@ -74,11 +74,10 @@ namespace KivoApp.Services
             var saldoAtual = CalcularSaldo();
             await MetaService.AtualizarMetas(saldoAtual);
             System.Diagnostics.Debug.WriteLine($"[TransacaoService] Saldo recalculado: {saldoAtual}");
-            // Notifica telas interessadas (MetasPage deve escutar "MetasAtualizadas")
-            MessagingCenter.Send<object>(null, "MetasAtualizadas");
+            MessagingCenter.Send(new object(), "MetasAtualizadas");
         }
 
-      
+
 
 
     }
