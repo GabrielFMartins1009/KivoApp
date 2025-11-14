@@ -40,6 +40,15 @@ namespace KivoApp
         protected override async void OnAppearing()
         {
             base.OnAppearing();
+
+            // 🔹 Define intervalo padrão: último mês
+            var hoje = DateTime.Today;
+            var umMesAtras = hoje.AddMonths(-1);
+
+            DataInicioPicker.Date = umMesAtras;
+            DataFimPicker.Date = hoje;
+
+            // 🔹 Carrega e filtra transações
             await CarregarTransacoesAsync();
             FiltrarTransacoes();
         }
